@@ -30,6 +30,7 @@ static mut STR_CREATE_FN: StrDeserializer = super::scalar::str_impl_kind_scalar;
 
 pub fn set_str_create_fn() {
     unsafe {
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
         #[cfg(feature = "avx512")]
         if std::is_x86_feature_detected!("avx512vl") {
             STR_CREATE_FN = crate::str::avx512::create_str_impl_avx512vl;
