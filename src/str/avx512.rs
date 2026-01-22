@@ -3,12 +3,14 @@
 
 use crate::str::pyunicode_new::*;
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 use core::arch::x86_64::{
     _mm512_and_si512, _mm512_cmpgt_epu8_mask, _mm512_cmpneq_epi8_mask, _mm512_loadu_epi8,
     _mm512_mask_cmpneq_epi8_mask, _mm512_maskz_loadu_epi8, _mm512_max_epu8, _mm512_set1_epi8,
 };
 
 #[inline(never)]
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx512f,avx512bw,avx512vl,bmi2")]
 pub(crate) unsafe fn create_str_impl_avx512vl(buf: &str) -> *mut crate::ffi::PyObject {
     unsafe {
