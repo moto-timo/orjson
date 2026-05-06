@@ -7,7 +7,7 @@ env:
   FORCE_COLOR: "1"
   ORJSON_BUILD_FREETHREADED: "1"
   PIP_DISABLE_PIP_VERSION_CHECK: "1"
-  RUST_TOOLCHAIN: "nightly-2026-03-28"
+  RUST_TOOLCHAIN: "nightly-2026-05-01"
   RUST_TOOLCHAIN_STABLE: "1.95"
   UNSAFE_PYO3_BUILD_FREE_THREADED: "1"
   UNSAFE_PYO3_SKIP_VERSION_CHECK: "1"
@@ -35,7 +35,7 @@ jobs:
     - name: Cargo.toml and pyproject.toml version must match
       run: ./script/check-version
 
-    - run: python3 -m pip install --user --upgrade pip "maturin>=1.12,<2" wheel
+    - run: python3 -m pip install --user --upgrade pip "maturin>=1.13.1,<2" wheel
 
     - name: Vendor dependencies
       run: |
@@ -99,6 +99,7 @@ jobs:
       CC: "clang"
       CFLAGS: "-O2 -fstrict-aliasing -fno-plt -emit-llvm"
       LDFLAGS: "-fuse-ld=lld -Wl,-plugin-opt=also-emit-llvm -Wl,--as-needed -Wl,-zrelro,-znow"
+      PATH: "/__w/orjson/orjson/.venv/bin:/github/home/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
       RUSTFLAGS: "-Z unstable-options -C panic=immediate-abort -C linker=clang -C link-arg=-fuse-ld=lld -C linker-plugin-lto -C link-arg=-Wl,-zrelro,-znow -Z mir-opt-level=4 -Z threads=4 -D warnings"
       VENV: ".venv"
     steps:
@@ -117,6 +118,23 @@ jobs:
           interpreter: "${{ matrix.python.interpreter }}"
           features: "${{ matrix.arch.features }}"
           compatibility: "${{ matrix.python.compatibility }}"
+          packages: ""
+
+      - run: pytest -v test
+        env:
+          PYTHONMALLOC: "debug"
+
+      - run: ./integration/run thread
+        env:
+          PYTHONMALLOC: "debug"
+
+      - run: ./integration/run http
+        env:
+          PYTHONMALLOC: "debug"
+
+      - run: ./integration/run init
+        env:
+          PYTHONMALLOC: "debug"
 
       - name: Store wheels
         if: matrix.python.publish == true
@@ -146,10 +164,10 @@ jobs:
       matrix:
         python: [
           { interpreter: 'python3.14', abi: 'cp314-cp314', manylinux: 'manylinux_2_17', maturin-version: 'v1.11.5', publish: true },
-          { interpreter: 'python3.13', abi: 'cp313-cp313', manylinux: 'manylinux_2_17', maturin-version: 'v1.12.6', publish: true },
-          { interpreter: 'python3.12', abi: 'cp312-cp312', manylinux: 'manylinux_2_17', maturin-version: 'v1.12.6', publish: true },
-          { interpreter: 'python3.11', abi: 'cp311-cp311', manylinux: 'manylinux_2_17', maturin-version: 'v1.12.6', publish: true },
-          { interpreter: 'python3.10', abi: 'cp310-cp310', manylinux: 'manylinux_2_17', maturin-version: 'v1.12.6', publish: true },
+          { interpreter: 'python3.13', abi: 'cp313-cp313', manylinux: 'manylinux_2_17', maturin-version: 'v1.13.1', publish: true },
+          { interpreter: 'python3.12', abi: 'cp312-cp312', manylinux: 'manylinux_2_17', maturin-version: 'v1.13.1', publish: true },
+          { interpreter: 'python3.11', abi: 'cp311-cp311', manylinux: 'manylinux_2_17', maturin-version: 'v1.13.1', publish: true },
+          { interpreter: 'python3.10', abi: 'cp310-cp310', manylinux: 'manylinux_2_17', maturin-version: 'v1.13.1', publish: true },
         ]
         target: [
           {
@@ -447,7 +465,7 @@ jobs:
 
         curl -LsSf https://astral.sh/uv/install.sh | sh
         uv venv --python python${{ matrix.python.version }}
-        uv pip install --upgrade "maturin>=1.12,<2" -r test/requirements.txt -r integration/requirements.txt
+        uv pip install --upgrade "maturin>=1.13.1,<2" -r test/requirements.txt -r integration/requirements.txt
 
         mkdir .cargo
         cp ci/config.toml .cargo/config.toml
@@ -533,7 +551,7 @@ jobs:
 
         curl -LsSf https://astral.sh/uv/install.sh | sh
         uv venv --python python${{ matrix.python.version }}
-        uv pip install --upgrade "maturin>=1.12,<2" -r test/requirements.txt -r integration/requirements.txt
+        uv pip install --upgrade "maturin>=1.13.1,<2" -r test/requirements.txt -r integration/requirements.txt
 
         mkdir .cargo
         cp ci/config.toml .cargo/config.toml
@@ -617,7 +635,7 @@ jobs:
       run: |
         cargo fetch --target "${{ matrix.platform.target }}" &
 
-        python.exe -m pip install --upgrade pip "maturin>=1.12,<2" wheel
+        python.exe -m pip install --upgrade pip "maturin>=1.13.1,<2" wheel
         python.exe -m pip install -r test\requirements.txt
 
         mkdir .cargo
@@ -688,7 +706,7 @@ jobs:
         cargo fetch --target "$" &
 
         python.exe -m sysconfig
-        python.exe -m pip install --upgrade pip "maturin>=1.12,<2" wheel
+        python.exe -m pip install --upgrade pip "maturin>=1.13.1,<2" wheel
         python.exe -m pip install -r test\requirements.txt
 
         mkdir .cargo

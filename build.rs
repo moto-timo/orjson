@@ -24,8 +24,7 @@ fn main() {
                 println!("cargo:rustc-cfg=feature=\"inline_str\"");
             }
         }
-        pyo3_build_config::PythonImplementation::GraalPy => not_supported("GraalPy"),
-        pyo3_build_config::PythonImplementation::PyPy => not_supported("PyPy"),
+        _ => not_supported(&python_config.implementation.to_string()),
     }
 
     for cfg in python_config.build_script_outputs() {
